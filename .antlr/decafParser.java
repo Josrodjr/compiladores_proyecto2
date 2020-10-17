@@ -717,6 +717,8 @@ public class decafParser extends Parser {
 		public ExpressionstmtContext(StatementContext ctx) { copyFrom(ctx); }
 	}
 	public static class LocationstmtContext extends StatementContext {
+		public LocationContext left;
+		public ExpressionContext right;
 		public LocationContext location() {
 			return getRuleContext(LocationContext.class,0);
 		}
@@ -839,11 +841,11 @@ public class decafParser extends Parser {
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(165);
-				location();
+				((LocationstmtContext)_localctx).left = location();
 				setState(166);
 				match(T__18);
 				setState(167);
-				expression(0);
+				((LocationstmtContext)_localctx).right = expression(0);
 				setState(168);
 				match(T__4);
 				}

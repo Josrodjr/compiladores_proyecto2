@@ -1056,6 +1056,8 @@ class decafParser ( Parser ):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a decafParser.StatementContext
             super().__init__(parser)
+            self.left = None # LocationContext
+            self.right = None # ExpressionContext
             self.copyFrom(ctx)
 
         def location(self):
@@ -1242,11 +1244,11 @@ class decafParser ( Parser ):
                 localctx = decafParser.LocationstmtContext(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 165
-                self.location()
+                localctx.left = self.location()
                 self.state = 166
                 self.match(decafParser.T__18)
                 self.state = 167
-                self.expression(0)
+                localctx.right = self.expression(0)
                 self.state = 168
                 self.match(decafParser.T__4)
                 pass

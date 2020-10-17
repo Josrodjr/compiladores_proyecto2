@@ -18,7 +18,7 @@ statement : 'if' '(' expression ')' block ('else' block)? #ifstmt
 | 'return' (expression)? ';' #returnstmt
 | methodCall ';' #methodstmt
 | block #blockstmt
-| location '=' expression ';' #locationstmt
+| left = location '=' right = expression ';' #locationstmt
 | (expression)? ';'#expressionstmt
 ;
 location : (ID | ID '[' expression ']') ('.' location)?;

@@ -93,7 +93,8 @@ class ASM_COMPLEX_IF():
 
                 # IF IN CASE NOT IN THE BASIC OPERANDS IT IS && OR ||
                 else:
-                    
+                    # DOESNT DO ANYTHING UP TO NOW
+                   op = 0  
                     
 
                     
