@@ -170,12 +170,30 @@ class decafListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by decafParser#rel_op_expr.
+    def enterRel_op_expr(self, ctx:decafParser.Rel_op_exprContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#rel_op_expr.
+    def exitRel_op_expr(self, ctx:decafParser.Rel_op_exprContext):
+        pass
+
+
     # Enter a parse tree produced by decafParser#minusexpr.
     def enterMinusexpr(self, ctx:decafParser.MinusexprContext):
         pass
 
     # Exit a parse tree produced by decafParser#minusexpr.
     def exitMinusexpr(self, ctx:decafParser.MinusexprContext):
+        pass
+
+
+    # Enter a parse tree produced by decafParser#cond_op_expr.
+    def enterCond_op_expr(self, ctx:decafParser.Cond_op_exprContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#cond_op_expr.
+    def exitCond_op_expr(self, ctx:decafParser.Cond_op_exprContext):
         pass
 
 
@@ -194,15 +212,6 @@ class decafListener(ParseTreeListener):
 
     # Exit a parse tree produced by decafParser#factoexpr.
     def exitFactoexpr(self, ctx:decafParser.FactoexprContext):
-        pass
-
-
-    # Enter a parse tree produced by decafParser#opexpr.
-    def enterOpexpr(self, ctx:decafParser.OpexprContext):
-        pass
-
-    # Exit a parse tree produced by decafParser#opexpr.
-    def exitOpexpr(self, ctx:decafParser.OpexprContext):
         pass
 
 
@@ -233,12 +242,30 @@ class decafListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by decafParser#p_arithexpr.
-    def enterP_arithexpr(self, ctx:decafParser.P_arithexprContext):
+    # Enter a parse tree produced by decafParser#p_arith_op_expr.
+    def enterP_arith_op_expr(self, ctx:decafParser.P_arith_op_exprContext):
         pass
 
-    # Exit a parse tree produced by decafParser#p_arithexpr.
-    def exitP_arithexpr(self, ctx:decafParser.P_arithexprContext):
+    # Exit a parse tree produced by decafParser#p_arith_op_expr.
+    def exitP_arith_op_expr(self, ctx:decafParser.P_arith_op_exprContext):
+        pass
+
+
+    # Enter a parse tree produced by decafParser#eq_op_expr.
+    def enterEq_op_expr(self, ctx:decafParser.Eq_op_exprContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#eq_op_expr.
+    def exitEq_op_expr(self, ctx:decafParser.Eq_op_exprContext):
+        pass
+
+
+    # Enter a parse tree produced by decafParser#arith_op_expr.
+    def enterArith_op_expr(self, ctx:decafParser.Arith_op_exprContext):
+        pass
+
+    # Exit a parse tree produced by decafParser#arith_op_expr.
+    def exitArith_op_expr(self, ctx:decafParser.Arith_op_exprContext):
         pass
 
 
@@ -257,15 +284,6 @@ class decafListener(ParseTreeListener):
 
     # Exit a parse tree produced by decafParser#arg.
     def exitArg(self, ctx:decafParser.ArgContext):
-        pass
-
-
-    # Enter a parse tree produced by decafParser#op.
-    def enterOp(self, ctx:decafParser.OpContext):
-        pass
-
-    # Exit a parse tree produced by decafParser#op.
-    def exitOp(self, ctx:decafParser.OpContext):
         pass
 
 

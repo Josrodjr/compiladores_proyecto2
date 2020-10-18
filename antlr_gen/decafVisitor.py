@@ -99,8 +99,18 @@ class decafVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by decafParser#rel_op_expr.
+    def visitRel_op_expr(self, ctx:decafParser.Rel_op_exprContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by decafParser#minusexpr.
     def visitMinusexpr(self, ctx:decafParser.MinusexprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by decafParser#cond_op_expr.
+    def visitCond_op_expr(self, ctx:decafParser.Cond_op_exprContext):
         return self.visitChildren(ctx)
 
 
@@ -111,11 +121,6 @@ class decafVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by decafParser#factoexpr.
     def visitFactoexpr(self, ctx:decafParser.FactoexprContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by decafParser#opexpr.
-    def visitOpexpr(self, ctx:decafParser.OpexprContext):
         return self.visitChildren(ctx)
 
 
@@ -134,8 +139,18 @@ class decafVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by decafParser#p_arithexpr.
-    def visitP_arithexpr(self, ctx:decafParser.P_arithexprContext):
+    # Visit a parse tree produced by decafParser#p_arith_op_expr.
+    def visitP_arith_op_expr(self, ctx:decafParser.P_arith_op_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by decafParser#eq_op_expr.
+    def visitEq_op_expr(self, ctx:decafParser.Eq_op_exprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by decafParser#arith_op_expr.
+    def visitArith_op_expr(self, ctx:decafParser.Arith_op_exprContext):
         return self.visitChildren(ctx)
 
 
@@ -146,11 +161,6 @@ class decafVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by decafParser#arg.
     def visitArg(self, ctx:decafParser.ArgContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by decafParser#op.
-    def visitOp(self, ctx:decafParser.OpContext):
         return self.visitChildren(ctx)
 
 

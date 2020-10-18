@@ -38,7 +38,16 @@ class reg_controller():
         if reg in self.registers:
             self.registers[reg] = 0
 
-    
+
+    def pop(self):
+        found = 0
+        for i in reversed(range(1,10)):
+            # check backwards the last intem in list
+            if self.registers['r'+str(i)] == 1:
+                found = 'r'+str(i)
+                self.registers[found] = 0
+                break
+        return found
 # test
 # controller = reg_controller()
 
@@ -47,3 +56,5 @@ class reg_controller():
 
 # a = controller.find_available()
 # print(a)
+
+# print(controller.pop())

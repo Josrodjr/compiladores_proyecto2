@@ -18,6 +18,7 @@ class NewVisitor(decafVisitor):
     t_simbolos = 0
     t_tipos = 0
     t_ambitos = 0
+    controller = reg_controller()
 
     # lines
     line = ''
@@ -68,16 +69,104 @@ class NewVisitor(decafVisitor):
     # LOCATION
     def visitLocationstmt(self, ctx):
         left_operand = self.visit(ctx.left)
-
-
         right_operand = self.visit(ctx.right)
+        # find if it exists in the table
+        if left_operand in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left_operand:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            print(scope_location)
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left_operand = str(scope_name)+"_"+str(left_operand)
+
+        # RIGHT OPERAND
+        if right_operand in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right_operand:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            print(scope_location)
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right_operand = str(scope_name)+"_"+str(right_operand)
+
         self.line += str(left_operand) + "=" + str(right_operand) + "\n"
+       
+        # free the reg
+        if right_operand in self.controller.registers:
+            self.controller.free(right_operand)
+
         return 0
 
     # -------------------------------------------- LOCATION ---------------------------------------------- 
     def visitLocation(self, ctx):
         value = ctx.getText()
         return value
+
+    # -------------------------------------------- EXPRESSION ---------------------------------------------- 
+    def visitP_arith_op_expr(self, ctx):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        if right == None:
+            right = self.controller.pop()
+        if left == None:
+            left = self.controller.pop()
+        # ALLOCATE A REGISTER
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        # line
+        self.line += str(reg) + "=" + str(left) + str(ctx.p_arith_op().getText()) + str(right) + "\n"
+        return reg
+
+    def visitArith_op_expr(self, ctx):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        # ALLOCATE A REGISTER
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        # line
+        self.line += str(reg) + "=" + str(left) + str(ctx.arith_op().getText()) + str(right) + "\n"
+        return reg
+
+    def visitRel_op_expr(self, ctx):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        # ALLOCATE A REGISTER
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        # line
+        self.line += str(reg) + "=" + str(left) + str(ctx.rel_op().getText()) + str(right) + "\n"
+        return reg
+
+    def visitEq_op_expr(self, ctx):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        # ALLOCATE A REGISTER
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        # line
+        self.line += str(reg) + "=" + str(left) + str(ctx.eq_op().getText()) + str(right) + "\n"
+        return reg
+
+    def visitCond_op_expr(self, ctx):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        # ALLOCATE A REGISTER
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        # line
+        self.line += str(reg) + "=" + str(left) + str(ctx.cond_op().getText()) + str(right) + "\n"
+        return reg
 
     # -------------------------------------------- LITERAL ---------------------------------------------- 
     def visitLiteral(self, ctx):
