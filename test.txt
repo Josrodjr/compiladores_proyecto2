@@ -24,12 +24,13 @@ class Program {
 		while (a > 1) {
 			a = a + 1;
 		}
+		return a;
     }
 
     void main() {
         int n;
         n = 5;
-        fib(n a);
+        a = fib(n a);
     }
 }
 

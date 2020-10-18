@@ -76,6 +76,11 @@ class NewVisitor(decafVisitor):
         # GET IF STAMENT COMPLETE
         label = self.l_controller.reserve()
         self.line += "if " + str(reg) + " jump " + str(label) + "\n"
+
+        # free the reg
+        if reg in self.controller.registers:
+            self.controller.free(reg)
+        
         if ctx.else_block:
             # generate a new label for the jump
             else_label = self.l_controller.reserve()
@@ -122,11 +127,41 @@ class NewVisitor(decafVisitor):
         reg = self.visit(ctx.expression())
         self.line += "if " + str(reg) + " jump " + str(block_label) + "\n"
         self.line += "label end\n"
+
+        if reg in self.controller.registers:
+            self.controller.free(reg)
         
         return 0
 
     # RETURN
     def visitReturnstmt(self, ctx):
+        if ctx.expression:
+            # always returns in r1
+            reg = self.visit(ctx.expression())
+            # in case it is not a reg
+            if reg in self.t_simbolos.simbolo:
+                # found a operand in the sibol table alrady instantiated so we add the ambito
+                i = 0
+                for value in range(len(self.t_simbolos.simbolo)):
+                    if self.t_simbolos.simbolo[value] == reg:
+                        i = value
+                # get the scope from the same table
+                scope_location = self.t_simbolos.ambito[i]
+                # get the scope name
+                scope_name = self.t_ambitos.nombre[scope_location]
+                # alter the reg
+                reg = str(scope_name)+"_"+str(reg)
+            # insert line
+            # asign R1
+            return_reg = self.controller.find_available()
+            self.controller.reserve(return_reg)
+            self.line += str(return_reg) + "=" + str(reg) + "\n" 
+            self.line += "return " + str(return_reg) + "\n"
+            # free the reg
+            if reg in self.controller.registers:
+                self.controller.free(reg)
+            # free the return reg
+            self.controller.free(return_reg)
         return 0
 
     # METHOD
@@ -415,7 +450,6 @@ class NewVisitor(decafVisitor):
 
     # -------------------------------------------- METHODCALL ---------------------------------------------- 
     def visitMethodCall(self, ctx):
-        print(self.controller.registers)
         method_name = ctx.ID().getText()
         # get a free register 
         reg = self.controller.find_available()
@@ -426,7 +460,20 @@ class NewVisitor(decafVisitor):
                 # add the param in a registry
                 register_arg = self.controller.find_available()
                 self.controller.reserve(register_arg)
-                self.line += str(register_arg) + "=" + str(arg.getText()) + "\n"
+
+                found_arg = arg.getText()
+                # in case the arg is a instanced variable
+                for value in range(len(self.t_simbolos.simbolo)):
+                    if self.t_simbolos.simbolo[value] == found_arg:
+                        i = value
+                        # get the scope from the same table
+                        scope_location = self.t_simbolos.ambito[i]
+                        # get the scope name
+                        scope_name = self.t_ambitos.nombre[scope_location]
+                        # alter the left operand with the name of the scope
+                        found_arg = str(scope_name)+"_"+str(found_arg)
+
+                self.line += str(register_arg) + "=" + str(found_arg) + "\n"
                 used_args.append(register_arg)
             for arg in used_args:
                 # free the register
