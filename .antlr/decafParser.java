@@ -689,6 +689,7 @@ public class decafParser extends Parser {
 		}
 	}
 	public static class WhilestmtContext extends StatementContext {
+		public BlockContext condition;
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -796,7 +797,7 @@ public class decafParser extends Parser {
 				setState(151);
 				match(T__13);
 				setState(152);
-				block();
+				((WhilestmtContext)_localctx).condition = block();
 				}
 				break;
 			case 3:

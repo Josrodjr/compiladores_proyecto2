@@ -14,7 +14,7 @@ parameter : parametertype ID | parametertype ID '[' ']';
 parametertype : 'int' | 'char' | 'boolean';
 block: '{' (varDeclaration)* (statement)* '}';
 statement : 'if' '(' expression ')' if_block = block ('else' else_block = block)? #ifstmt
-| 'while' '(' expression ')' block #whilestmt
+| 'while' '(' expression ')' condition = block #whilestmt
 | 'return' (expression)? ';' #returnstmt
 | methodCall ';' #methodstmt
 | block #blockstmt

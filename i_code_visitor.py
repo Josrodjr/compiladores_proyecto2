@@ -10,6 +10,8 @@ import codecs
 
 # we are reserving the registers available for the operations
 from logic.registry_control import reg_controller
+# for the labels of the registers we are using in the forks
+from logic.jump_control import label_controller
 # import the tables we are going to use to check
 from tables import Tabla_simbolos, Tabla_tipos, Tabla_ambitos
 
@@ -19,6 +21,7 @@ class NewVisitor(decafVisitor):
     t_tipos = 0
     t_ambitos = 0
     controller = reg_controller()
+    l_controller = label_controller()
 
     # lines
     line = ''
@@ -52,10 +55,74 @@ class NewVisitor(decafVisitor):
     # -------------------------------------------- STATEMENT ---------------------------------------------- 
     # IF
     def visitIfstmt(self, ctx):
+        reg = self.visit(ctx.expression())
+        # in case it is not a reg
+        if reg in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == reg:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the reg
+            reg = str(scope_name)+"_"+str(reg)
+
+        if reg in self.controller.registers:
+            self.controller.free(reg)
+        
+        # GET IF STAMENT COMPLETE
+        label = self.l_controller.reserve()
+        self.line += "if " + str(reg) + " jump " + str(label) + "\n"
+        if ctx.else_block:
+            # generate a new label for the jump
+            else_label = self.l_controller.reserve()
+            self.line += "else jump " + str(else_label) + "\n"
+        # GENERATE CODE INSIDE IF BLOCK
+        self.line += str(label) + ":\n"
+        self.visit(ctx.if_block)
+        self.line += "label end\n"
+        # GENERATE CODE INSIDE ELSE BLOCK
+        if ctx.else_block:
+            self.line += str(else_label) + ":\n"
+            self.visit(ctx.else_block)
+            self.line += "label end\n"
         return 0
 
     # WHILE
     def visitWhilestmt(self, ctx):
+        reg = self.visit(ctx.expression())
+        # in case it is not a reg
+        if reg in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == reg:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the reg
+            reg = str(scope_name)+"_"+str(reg)
+
+        if reg in self.controller.registers:
+            self.controller.free(reg)
+
+        # label for the code exec
+        block_label = self.l_controller.reserve()
+        self.line += "if " + str(reg) + " jump " + str(block_label) + "\n"
+        
+        # GENERATE CODE INSIDE IF BLOCK
+        self.line += str(block_label) + ":\n"
+        self.visit(ctx.condition)
+        # jump back
+        reg = self.visit(ctx.expression())
+        self.line += "if " + str(reg) + " jump " + str(block_label) + "\n"
+        self.line += "label end\n"
+        
         return 0
 
     # RETURN
@@ -79,7 +146,6 @@ class NewVisitor(decafVisitor):
                     i = value
             # get the scope from the same table
             scope_location = self.t_simbolos.ambito[i]
-            print(scope_location)
             # get the scope name
             scope_name = self.t_ambitos.nombre[scope_location]
             # alter the left operand with the name of the scope
@@ -94,7 +160,6 @@ class NewVisitor(decafVisitor):
                     i = value
             # get the scope from the same table
             scope_location = self.t_simbolos.ambito[i]
-            print(scope_location)
             # get the scope name
             scope_name = self.t_ambitos.nombre[scope_location]
             # alter the left operand with the name of the scope
@@ -108,12 +173,20 @@ class NewVisitor(decafVisitor):
 
         return 0
 
+    # def visitExpressionstmt(self, ctx):
+    #     self.visitChildren(ctx)
+    #     return 0
+
     # -------------------------------------------- LOCATION ---------------------------------------------- 
     def visitLocation(self, ctx):
         value = ctx.getText()
         return value
 
     # -------------------------------------------- EXPRESSION ---------------------------------------------- 
+    # def visitMethodexpr(self, ctx):
+    #     self.visitChildren(ctx)
+    #     return 0
+
     def visitP_arith_op_expr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
@@ -122,6 +195,37 @@ class NewVisitor(decafVisitor):
         if left == None:
             left = self.controller.pop()
         # ALLOCATE A REGISTER
+        if left in self.controller.registers:
+            self.controller.free(left)
+        
+        # case it is a instantiated variable
+        if left in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left = str(scope_name)+"_"+str(left)
+
+        # RIGHT OPERAND
+        if right in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right = str(scope_name)+"_"+str(right)
+        
         reg = self.controller.find_available()
         self.controller.reserve(reg)
         # line
@@ -131,7 +235,43 @@ class NewVisitor(decafVisitor):
     def visitArith_op_expr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
+        if right == None:
+            right = self.controller.pop()
+        if left == None:
+            left = self.controller.pop()
         # ALLOCATE A REGISTER
+        # if the left is a register free it
+        if left in self.controller.registers:
+            self.controller.free(left)
+
+        # case it is a instantiated variable
+        if left in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left = str(scope_name)+"_"+str(left)
+
+        # RIGHT OPERAND
+        if right in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right = str(scope_name)+"_"+str(right)
+
         reg = self.controller.find_available()
         self.controller.reserve(reg)
         # line
@@ -141,7 +281,42 @@ class NewVisitor(decafVisitor):
     def visitRel_op_expr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
+        if right == None:
+            right = self.controller.pop()
+        if left == None:
+            left = self.controller.pop()
         # ALLOCATE A REGISTER
+        if left in self.controller.registers:
+            self.controller.free(left)
+
+        # case it is a instantiated variable
+        if left in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left = str(scope_name)+"_"+str(left)
+
+        # RIGHT OPERAND
+        if right in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right = str(scope_name)+"_"+str(right)
+
         reg = self.controller.find_available()
         self.controller.reserve(reg)
         # line
@@ -151,7 +326,42 @@ class NewVisitor(decafVisitor):
     def visitEq_op_expr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
+        if right == None:
+            right = self.controller.pop()
+        if left == None:
+            left = self.controller.pop()
         # ALLOCATE A REGISTER
+        if left in self.controller.registers:
+            self.controller.free(left)
+        
+        # case it is a instantiated variable
+        if left in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left = str(scope_name)+"_"+str(left)
+
+        # RIGHT OPERAND
+        if right in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right = str(scope_name)+"_"+str(right)
+
         reg = self.controller.find_available()
         self.controller.reserve(reg)
         # line
@@ -161,12 +371,72 @@ class NewVisitor(decafVisitor):
     def visitCond_op_expr(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
+        if right == None:
+            right = self.controller.pop()
+        if left == None:
+            left = self.controller.pop()
         # ALLOCATE A REGISTER
+        if left in self.controller.registers:
+            self.controller.free(left)
+
+        # case it is a instantiated variable
+        if left in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == left:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            left = str(scope_name)+"_"+str(left)
+
+        # RIGHT OPERAND
+        if right in self.t_simbolos.simbolo:
+            # found a operand in the sibol table alrady instantiated so we add the ambito
+            i = 0
+            for value in range(len(self.t_simbolos.simbolo)):
+                if self.t_simbolos.simbolo[value] == right:
+                    i = value
+            # get the scope from the same table
+            scope_location = self.t_simbolos.ambito[i]
+            # get the scope name
+            scope_name = self.t_ambitos.nombre[scope_location]
+            # alter the left operand with the name of the scope
+            right = str(scope_name)+"_"+str(right)
+        
         reg = self.controller.find_available()
         self.controller.reserve(reg)
         # line
         self.line += str(reg) + "=" + str(left) + str(ctx.cond_op().getText()) + str(right) + "\n"
         return reg
+
+    # -------------------------------------------- METHODCALL ---------------------------------------------- 
+    def visitMethodCall(self, ctx):
+        print(self.controller.registers)
+        method_name = ctx.ID().getText()
+        # get a free register 
+        reg = self.controller.find_available()
+        self.controller.reserve(reg)
+        if ctx.arg():
+            used_args = []
+            for arg in ctx.arg():
+                # add the param in a registry
+                register_arg = self.controller.find_available()
+                self.controller.reserve(register_arg)
+                self.line += str(register_arg) + "=" + str(arg.getText()) + "\n"
+                used_args.append(register_arg)
+            for arg in used_args:
+                # free the register
+                self.controller.free(arg)
+        # call the function
+        self.line += str(reg) + "= func_call " + str(method_name) + "\n" 
+        # free pointer register
+        self.controller.free(reg)
+        self.visitChildren(ctx)
+        return 0
 
     # -------------------------------------------- LITERAL ---------------------------------------------- 
     def visitLiteral(self, ctx):

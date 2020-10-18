@@ -972,6 +972,7 @@ class decafParser ( Parser ):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a decafParser.StatementContext
             super().__init__(parser)
+            self.condition = None # BlockContext
             self.copyFrom(ctx)
 
         def expression(self):
@@ -1206,7 +1207,7 @@ class decafParser ( Parser ):
                 self.state = 151
                 self.match(decafParser.T__13)
                 self.state = 152
-                self.block()
+                localctx.condition = self.block()
                 pass
 
             elif la_ == 3:

@@ -5,23 +5,31 @@ class Program {
         int a;
         int b;
         int c;
+		boolean d;
 
         a = 0;
         b = 1;
 	    a = (5 + 5) * (6 / 7) - 50;
-        while (n-2 > 0) {
+		d = true && false;
+        if (true || false) {
             c = a + b;
             a = b;
             b = c;
             print(c);
             n = n - 1;
-        }
+        } else {
+			c = d;
+			a = 1;
+		}
+		while (a > 1) {
+			a = a + 1;
+		}
     }
 
     void main() {
         int n;
         n = 5;
-        fib(n);
+        fib(n a);
     }
 }
 
