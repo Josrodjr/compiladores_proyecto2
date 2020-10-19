@@ -116,10 +116,6 @@ def fill_tables(container, container_2, container_3):
     # restart the values in the visitor]
     c_visitor, i_visitor = init_visitor()
 
-    t1 = c_visitor.t_simbolos
-    t2 = c_visitor.t_tipos
-    t3 = c_visitor.t_ambitos
-
     simbolos_str = "Tabla de Simbolos \n"
     tipos_str = "Tabla de Tipos \n"
     ambitos_str = "Tabla de Ambitos \n"
